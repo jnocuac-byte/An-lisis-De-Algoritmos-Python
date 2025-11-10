@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 import time
+import threading
 from typing import List, Dict, Any
 
 from complexity_detector import ComplexityDetector
-from dataset_generator import DatasetGenerator
 from code_executor import CodeExecutor
 from complexity_analyzer import ComplexityAnalyzer
 
@@ -23,16 +23,12 @@ class TemporalAnalyzerGUI:
         
         self.current_results = None
         self.detected_complexity = None
-
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
-
+        self.is_analyzing = False
+        
+        # Configuraciones de ejecución
+        self.predefined_configs = [700, 1500, 3000]
+        
         self.setup_ui()
-
-    def on_closing(self):
-        """Maneja el cierre de la ventana"""
-        if messagebox.askokcancel("Salir", "¿Estás seguro de que deseas salir?"):
-            self.root.quit()
-            self.root.destroy()
     
     def setup_ui(self):
         """Configura la interfaz de usuario"""
@@ -57,82 +53,79 @@ class TemporalAnalyzerGUI:
         )
         self.code_editor.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        example_code = """# Ejemplo Merge Sort con dataset:
-def merge_sort(arr):
-    if len(arr) > 1:
-        mid = len(arr) // 2
-        left_half = arr[:mid]
-        right_half = arr[mid:]
+        example_code = """# Ejemplo de función o código:
+def suma(a, b):
+    return a + b
 
-        merge_sort(left_half)
-        merge_sort(right_half)
+# O código directo:
+# resultado = x ** 2 + y * 3
 
-        i = j = k = 0
-
-        while i < len(left_half) and j < len(right_half):
-            if left_half[i] < right_half[j]:
-                arr[k] = left_half[i]
-                i += 1
-            else:
-                arr[k] = right_half[j]
-                j += 1
-            k += 1
-
-        while i < len(left_half):
-            arr[k] = left_half[i]
-            i += 1
-            k += 1
-
-        while j < len(right_half):
-            arr[k] = right_half[j]
-            j += 1
-            k += 1
-            
-    return arr
-
-arreglo_ejemplo = arr
-arreglo_ordenado = merge_sort(arreglo_ejemplo)
-
-print(arreglo_ordenado)"""
+# O algoritmo más complejo:
+# def fibonacci(n):
+#     if n <= 1:
+#         return n
+#     return fibonacci(n-1) + fibonacci(n-2)"""
         self.code_editor.insert('1.0', example_code)
         
         control_frame = ttk.LabelFrame(left_frame, text="Configuración", padding=10)
         control_frame.pack(fill=tk.X, padx=5, pady=5)
         
-        mode_frame = ttk.Frame(control_frame)
-        mode_frame.pack(fill=tk.X, pady=5)
+        # Configuración de ejecuciones
+        exec_frame = ttk.LabelFrame(control_frame, text="Número de Ejecuciones", padding=10)
+        exec_frame.pack(fill=tk.X, pady=5)
         
-        ttk.Label(mode_frame, text="Modo:").pack(side=tk.LEFT, padx=5)
-        self.mode_var = tk.StringVar(value="with_dataset")
+        self.exec_mode_var = tk.StringVar(value="predefined")
+        
         ttk.Radiobutton(
-            mode_frame, 
-            text="Con Dataset", 
-            variable=self.mode_var, 
-            value="with_dataset",
-            command=self.on_mode_change
-        ).pack(side=tk.LEFT, padx=5)
+            exec_frame,
+            text="Estándar (700, 1500, 3000)",
+            variable=self.exec_mode_var,
+            value="predefined",
+            command=self.on_exec_mode_change
+        ).pack(anchor=tk.W, pady=2)
+        
         ttk.Radiobutton(
-            mode_frame, 
-            text="Sin Dataset", 
-            variable=self.mode_var, 
-            value="without_dataset",
-            command=self.on_mode_change
-        ).pack(side=tk.LEFT, padx=5)
+            exec_frame,
+            text="Personalizado",
+            variable=self.exec_mode_var,
+            value="custom",
+            command=self.on_exec_mode_change
+        ).pack(anchor=tk.W, pady=2)
         
-        self.dataset_frame = ttk.Frame(control_frame)
-        self.dataset_frame.pack(fill=tk.X, pady=5)
+        # Frame para ejecuciones personalizadas
+        self.custom_exec_frame = ttk.Frame(exec_frame)
         
-        ttk.Label(self.dataset_frame, text="Tipo de dato:").pack(side=tk.LEFT, padx=5)
-        self.data_type_var = tk.StringVar(value="int")
-        ttk.Combobox(
-            self.dataset_frame, 
-            textvariable=self.data_type_var,
-            values=["int", "float", "string"],
-            state="readonly",
-            width=10
-        ).pack(side=tk.LEFT, padx=5)
+        custom_grid = ttk.Frame(self.custom_exec_frame)
+        custom_grid.pack(fill=tk.X, pady=5)
         
-        ttk.Label(self.dataset_frame, text="Variable: arr, conjunto, data").pack(side=tk.LEFT, padx=10)
+        ttk.Label(custom_grid, text="Config 1:").grid(row=0, column=0, padx=5, pady=2, sticky=tk.W)
+        self.custom_exec1 = ttk.Entry(custom_grid, width=10)
+        self.custom_exec1.grid(row=0, column=1, padx=5, pady=2)
+        self.custom_exec1.insert(0, "3000")
+        
+        ttk.Label(custom_grid, text="Config 2:").grid(row=1, column=0, padx=5, pady=2, sticky=tk.W)
+        self.custom_exec2 = ttk.Entry(custom_grid, width=10)
+        self.custom_exec2.grid(row=1, column=1, padx=5, pady=2)
+        self.custom_exec2.insert(0, "7000")
+        
+        ttk.Label(custom_grid, text="Config 3:").grid(row=2, column=0, padx=5, pady=2, sticky=tk.W)
+        self.custom_exec3 = ttk.Entry(custom_grid, width=10)
+        self.custom_exec3.grid(row=2, column=1, padx=5, pady=2)
+        self.custom_exec3.insert(0, "15000")
+        
+        ttk.Label(
+            self.custom_exec_frame,
+            text="Límite máximo: 1,000,000 ejecuciones",
+            foreground="gray",
+            font=("Arial", 8)
+        ).pack(pady=5)
+        
+        ttk.Label(
+            exec_frame,
+            text="Se tomarán 20 puntos muestreados de cada configuración",
+            foreground="#555",
+            font=("Arial", 8)
+        ).pack(pady=5)
         
         button_frame = ttk.Frame(control_frame)
         button_frame.pack(fill=tk.X, pady=10)
@@ -160,6 +153,22 @@ print(arreglo_ordenado)"""
             text="🗑 Limpiar", 
             command=self.clear_editor
         ).pack(side=tk.LEFT, padx=5)
+        
+        # Barra de progreso
+        self.progress_frame = ttk.Frame(control_frame)
+        self.progress_label = ttk.Label(
+            self.progress_frame,
+            text="",
+            font=("Arial", 8)
+        )
+        self.progress_label.pack()
+        
+        self.progress_bar = ttk.Progressbar(
+            self.progress_frame,
+            mode='determinate',
+            length=300
+        )
+        self.progress_bar.pack(fill=tk.X, pady=5)
         
         results_label = ttk.Label(left_frame, text="Resultados:", font=("Arial", 10, "bold"))
         results_label.pack(pady=(5, 2))
@@ -189,7 +198,7 @@ print(arreglo_ordenado)"""
             complexity_frame, 
             text="", 
             font=("Courier", 11),
-            foreground="#555"   
+            foreground="#555"
         )
         self.notation_label.pack(pady=5)
         
@@ -204,7 +213,8 @@ print(arreglo_ordenado)"""
         graph_label = ttk.Label(right_frame, text="Visualización Temporal", font=("Arial", 12, "bold"))
         graph_label.pack(pady=10)
         
-        self.figure, self.ax = plt.subplots(figsize=(7, 5))
+        # Crear figura con 3 subplots
+        self.figure, self.axes = plt.subplots(1, 3, figsize=(12, 4))
         self.canvas = FigureCanvasTkAgg(self.figure, right_frame)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
@@ -216,13 +226,14 @@ print(arreglo_ordenado)"""
         export_btn.pack(pady=5)
         
         self.show_empty_graph()
+        self.on_exec_mode_change()
     
-    def on_mode_change(self):
-        """Maneja el cambio de modo"""
-        if self.mode_var.get() == "with_dataset":
-            self.dataset_frame.pack(fill=tk.X, pady=5)
+    def on_exec_mode_change(self):
+        """Maneja el cambio de modo de ejecución"""
+        if self.exec_mode_var.get() == "custom":
+            self.custom_exec_frame.pack(fill=tk.X, pady=5)
         else:
-            self.dataset_frame.pack_forget()
+            self.custom_exec_frame.pack_forget()
     
     def log_result(self, message: str, clear: bool = False):
         """Escribe en el área de resultados"""
@@ -283,158 +294,203 @@ print(arreglo_ordenado)"""
             messagebox.showerror("Error de Sintaxis", f"✗ Error:\n{result['error']}")
             self.log_result(f"✗ Error de sintaxis:\n{result['error']}", clear=True)
     
+    def get_execution_configs(self) -> List[int]:
+        """Obtiene las configuraciones de ejecución"""
+        if self.exec_mode_var.get() == "predefined":
+            return self.predefined_configs
+        else:
+            try:
+                config1 = int(self.custom_exec1.get())
+                config2 = int(self.custom_exec2.get())
+                config3 = int(self.custom_exec3.get())
+                
+                # Validar límites
+                max_limit = 1000000
+                if any(c <= 0 or c > max_limit for c in [config1, config2, config3]):
+                    messagebox.showerror(
+                        "Error",
+                        f"Las configuraciones deben estar entre 1 y {max_limit:,}"
+                    )
+                    return None # type: ignore
+                
+                # Ordenar de menor a mayor
+                configs = sorted([config1, config2, config3])
+                return configs
+                
+            except ValueError:
+                messagebox.showerror("Error", "Los valores deben ser números enteros")
+                return None # type: ignore
+    
     def analyze_code(self):
-        """Analiza el código según el modo seleccionado"""
+        """Inicia el análisis del código"""
+        if self.is_analyzing:
+            messagebox.showwarning("Advertencia", "Ya hay un análisis en curso")
+            return
+        
         code = self.code_editor.get('1.0', tk.END).strip()
         if not code:
             messagebox.showwarning("Advertencia", "Por favor ingresa código para analizar")
             return
         
+        # Verificar sintaxis
         syntax_result = CodeExecutor.test_code_syntax(code)
         if not syntax_result['valid']:
             messagebox.showerror("Error de Sintaxis", f"✗ Error:\n{syntax_result['error']}")
             self.log_result(f"✗ Error de sintaxis:\n{syntax_result['error']}", clear=True)
             return
         
-        self.log_result("🔄 Analizando código...", clear=True)
+        # Obtener configuraciones
+        configs = self.get_execution_configs()
+        if configs is None:
+            return
         
-        # Detectar complejidad primero
+        # Detectar complejidad
         detector = ComplexityDetector(code)
         complexity_result = detector.analyze()
         self.detected_complexity = complexity_result
         self.update_complexity_display(complexity_result)
         
-        self.root.update()
+        # Iniciar análisis en thread
+        self.is_analyzing = True
+        self.progress_frame.pack(fill=tk.X, pady=10)
+        self.log_result("🔄 Iniciando análisis...", clear=True)
         
-        mode = self.mode_var.get()
-        
+        thread = threading.Thread(
+            target=self.run_analysis,
+            args=(code, configs),
+            daemon=True
+        )
+        thread.start()
+    
+    def update_progress(self, overall: float, config: int, config_progress: float):
+        """Actualiza la barra de progreso"""
+        self.progress_bar['value'] = overall
+        self.progress_label.config(
+            text=f"Analizando con {config:,} ejecuciones... {config_progress:.1f}%"
+        )
+        self.root.update_idletasks()
+    
+    def run_analysis(self, code: str, configs: List[int]):
+        """Ejecuta el análisis en thread separado"""
         try:
-            if mode == "with_dataset":
-                self.analyze_with_dataset(code)
+            results = ComplexityAnalyzer.analyze_multiple_executions(
+                code,
+                configs,
+                lambda o, c, p: self.root.after(0, lambda: self.update_progress(o, c, p))
+            )
+            
+            if not results['success']: # type: ignore
+                self.root.after(0, lambda: messagebox.showerror(
+                    "Error",
+                    f"Error en configuración {results['failed_config']}:\n{results['error']}" # type: ignore
+                ))
+                self.root.after(0, lambda: self.log_result(f"✗ Error: {results['error']}")) # type: ignore
             else:
-                self.analyze_without_dataset(code)
+                self.current_results = results['results'] # type: ignore
+                self.root.after(0, lambda: self.display_results(results['results'], configs)) # type: ignore
+                self.root.after(0, lambda: messagebox.showinfo("Éxito", "Análisis completado"))
+                
         except Exception as e:
-            messagebox.showerror("Error", f"Error durante el análisis:\n{str(e)}")
-            self.log_result(f"✗ Error: {str(e)}")
+            self.root.after(0, lambda: messagebox.showerror(
+                "Error",
+                f"Error durante el análisis:\n{str(e)}"
+            ))
+        finally:
+            self.is_analyzing = False
+            self.root.after(0, self.progress_frame.pack_forget)
     
-    def analyze_with_dataset(self, code: str):
-        """Analiza código con datasets escalables"""
-        data_type = self.data_type_var.get()
+    def display_results(self, results: Dict[int, Dict], configs: List[int]):
+        """Muestra los resultados en el log y gráficos"""
+        self.log_result("\n✓ Análisis completado:", clear=False)
         
-        self.log_result(f"📊 Tipo de dato: {data_type}")
-        self.log_result("📦 Cargando/generando datasets...")
+        for config in configs:
+            data = results[config]
+            self.log_result(f"\n📊 Configuración: {config:,} ejecuciones")
+            self.log_result(f"  • Tiempo promedio: {ComplexityAnalyzer.format_time(data['avg_time'])}")
+            self.log_result(f"  • Desviación estándar: {ComplexityAnalyzer.format_time(data['std_time'])}")
+            self.log_result(f"  • Tiempo mínimo: {ComplexityAnalyzer.format_time(data['min_time'])}")
+            self.log_result(f"  • Tiempo máximo: {ComplexityAnalyzer.format_time(data['max_time'])}")
         
-        datasets = DatasetGenerator.get_or_create_dataset(data_type)
-        self.log_result(f"✓ {len(datasets)} datasets listos")
-        
-        self.log_result("⏱ Midiendo tiempos de ejecución...")
-        results = ComplexityAnalyzer.analyze_with_dataset(code, datasets)
-        
-        if results['errors']:
-            error_info = results['errors'][0]
-            self.log_result(f"\n✗ Error en dataset #{error_info['dataset_index']} (tamaño {error_info['size']}):")
-            self.log_result(error_info['error'])
-            messagebox.showerror("Error de Ejecución", f"Error al ejecutar el código:\n{error_info['error']}")
-            return
-        
-        if not results['sizes']:
-            self.log_result("✗ No se pudieron obtener resultados")
-            return
-        
-        self.current_results = results
-        
-        self.log_result(f"\n✓ Análisis completado:")
-        self.log_result(f"  • Datasets procesados: {len(results['sizes'])}")
-        self.log_result(f"  • Tamaño mínimo: {min(results['sizes'])}")
-        self.log_result(f"  • Tamaño máximo: {max(results['sizes'])}")
-        self.log_result(f"  • Tiempo mínimo: {min(results['times']):.6f}s")
-        self.log_result(f"  • Tiempo máximo: {max(results['times']):.6f}s")
-        
-        self.plot_complexity_graph(results['sizes'], results['times'])
+        # Graficar resultados
+        self.plot_results(results, configs)
     
-    def analyze_without_dataset(self, code: str):
-        """Analiza código sin datasets (tiempo promedio)"""
-        self.log_result("⏱ Ejecutando código 10 veces...")
+    def plot_results(self, results: Dict[int, Dict], configs: List[int]):
+        """Genera los 3 subplots con los resultados"""
+        # Limpiar axes
+        for ax in self.axes:
+            ax.clear()
         
-        results = ComplexityAnalyzer.analyze_without_dataset(code, iterations=10)
+        colors = ['#2E86AB', '#A23B72', '#F18F01']
         
-        if not results['success']:
-            self.log_result(f"\n✗ Error al ejecutar el código:")
-            self.log_result(results['error'])
-            messagebox.showerror("Error de Ejecución", f"Error:\n{results['error']}")
-            return
-        
-        self.log_result(f"\n✓ Análisis completado:")
-        self.log_result(f"  • Tiempo promedio: {results['avg_time']:.6f}s")
-        self.log_result(f"  • Desviación estándar: {results['std_time']:.6f}s")
-        self.log_result(f"  • Tiempo mínimo: {min(results['times']):.6f}s")
-        self.log_result(f"  • Tiempo máximo: {max(results['times']):.6f}s")
-        
-        self.plot_execution_times(results['times'])
-    
-    def plot_complexity_graph(self, sizes: List[int], times: List[float]):
-        """Grafica la complejidad temporal"""
-        self.ax.clear()
-        
-        self.ax.plot(sizes, times, 'o-', linewidth=2, markersize=8, color='#2E86AB', label='Tiempo medido')
-        self.ax.fill_between(sizes, times, alpha=0.3, color='#2E86AB')
-        
-        self.ax.set_xlabel('Tamaño de entrada (n)', fontsize=11, fontweight='bold')
-        self.ax.set_ylabel('Tiempo de ejecución (s)', fontsize=11, fontweight='bold')
-        
-        title = 'Análisis de Complejidad Temporal'
-        if self.detected_complexity:
-            title += f"\n{self.detected_complexity['complexity']}"
-        self.ax.set_title(title, fontsize=13, fontweight='bold', pad=15)
-        
-        self.ax.grid(True, alpha=0.3, linestyle='--')
-        self.ax.legend(loc='upper left')
-        self.ax.ticklabel_format(style='scientific', axis='x', scilimits=(0,0))
-        
-        self.figure.tight_layout()
-        self.canvas.draw()
-    
-    def plot_execution_times(self, times: List[float]):
-        """Grafica los tiempos de ejecución múltiples"""
-        self.ax.clear()
-        
-        iterations = list(range(1, len(times) + 1))
-        avg_time = np.mean(times)
-        
-        self.ax.plot(iterations, times, 'o-', linewidth=2, markersize=8, color='#A23B72', label='Tiempo medido')
-        self.ax.axhline(y=avg_time, color='#F18F01', linestyle='--', linewidth=2, label=f'Promedio: {avg_time:.6f}s') # type: ignore
-        
-        self.ax.set_xlabel('Iteración', fontsize=11, fontweight='bold')
-        self.ax.set_ylabel('Tiempo de ejecución (s)', fontsize=11, fontweight='bold')
-        
-        title = 'Tiempos de Ejecución (10 iteraciones)'
-        if self.detected_complexity:
-            title += f"\n{self.detected_complexity['complexity']}"
-        self.ax.set_title(title, fontsize=13, fontweight='bold', pad=15)
-        
-        self.ax.grid(True, alpha=0.3, linestyle='--')
-        self.ax.legend(loc='upper right')
+        for idx, config in enumerate(configs):
+            data = results[config]
+            ax = self.axes[idx]
+            
+            # Graficar línea constante de tiempos muestreados
+            ax.plot(
+                data['sampled_indices'],
+                data['sampled_times'],
+                'o-',
+                linewidth=2,
+                markersize=6,
+                color=colors[idx],
+                label=f"{config:,} ejecuciones"
+            )
+            
+            # Línea promedio
+            avg_line = np.mean(data['sampled_times'])
+            ax.axhline(
+                y=avg_line,
+                color=colors[idx],
+                linestyle='--',
+                linewidth=1,
+                alpha=0.5
+            )
+            
+            ax.set_xlabel('Ejecución #', fontsize=9, fontweight='bold')
+            ax.set_ylabel('Tiempo (s)', fontsize=9, fontweight='bold')
+            ax.set_title(f'{config:,} ejecuciones', fontsize=10, fontweight='bold')
+            ax.grid(True, alpha=0.3, linestyle='--')
+            ax.ticklabel_format(style='scientific', axis='y', scilimits=(0,0))
+            
+            # Agregar texto con tiempo promedio
+            ax.text(
+                0.95, 0.95,
+                f'Promedio:\n{ComplexityAnalyzer.format_time(data["avg_time"])}',
+                transform=ax.transAxes,
+                fontsize=8,
+                verticalalignment='top',
+                horizontalalignment='right',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+            )
         
         self.figure.tight_layout()
         self.canvas.draw()
     
     def show_empty_graph(self):
-        """Muestra un gráfico vacío inicial"""
-        self.ax.clear()
-        self.ax.text(0.5, 0.5, 'Ejecuta un análisis para ver resultados', 
-                    ha='center', va='center', fontsize=12, color='gray',
-                    transform=self.ax.transAxes)
-        self.ax.set_xticks([])
-        self.ax.set_yticks([])
+        """Muestra gráficos vacíos iniciales"""
+        for ax in self.axes:
+            ax.clear()
+            ax.text(
+                0.5, 0.5,
+                'Ejecuta un\nanálisis primero',
+                ha='center',
+                va='center',
+                fontsize=10,
+                color='gray',
+                transform=ax.transAxes
+            )
+            ax.set_xticks([])
+            ax.set_yticks([])
         self.canvas.draw()
     
     def export_graph(self):
         """Exporta el gráfico actual"""
-        if self.current_results is None and self.detected_complexity is None:
-            messagebox.showinfo("Info", "No hay gráfico para exportar. Ejecuta un análisis primero.")
+        if self.current_results is None:
+            messagebox.showinfo("Info", "No hay gráfico para exportar")
             return
         
-        filename = f"complexity_graph_{int(time.time())}.png"
+        filename = f"temporal_analysis_{int(time.time())}.png"
         self.figure.savefig(filename, dpi=300, bbox_inches='tight')
         messagebox.showinfo("Éxito", f"Gráfico exportado como:\n{filename}")
         self.log_result(f"\n💾 Gráfico guardado: {filename}")
