@@ -27,8 +27,21 @@ class TemporalAnalyzerGUI:
         
         # Configuraciones de ejecución
         self.predefined_configs = [700, 1500, 3000]
+
+        self.root.protocol("WM_DELETE_WINDOW", self.on_Closing)
         
         self.setup_ui()
+
+    def on_Closing(self):
+        """Maneja el cierre de la ventana"""
+        if self.is_analyzing:
+            if not messagebox.askokcancel(
+                "Salir",
+                "Un análisis está en curso. ¿Seguro que deseas salir?"
+            ):
+                return
+        self.root.quit()    
+        self.root.destroy()
     
     def setup_ui(self):
         """Configura la interfaz de usuario"""
