@@ -6,8 +6,8 @@ from typing import List, Tuple
 class DatasetManager:
     """Gestiona la generación y carga de datasets para ordenamiento"""
     
-    MAX_SIZE = 100000  # Límite máximo de elementos
-    PREDEFINED_SIZES = [1000, 5000, 10000]
+    MAX_SIZE = 1000000  # Límite máximo de elementos
+    PREDEFINED_SIZES = [1000, 5000, 10000, 50000, 100000]
     NUM_SUBSETS = 15
     
     @staticmethod
