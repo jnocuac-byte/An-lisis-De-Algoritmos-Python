@@ -13,6 +13,12 @@ class SortingAlgorithms:
     def get_algorithm_info() -> Dict[str, Dict[str, str]]:
         """Retorna información de complejidad de cada algoritmo"""
         return {
+            'Tree Sort': {
+                'best': 'O(n log n)',
+                'average': 'O(n log n)',
+                'worst': 'O(n²)',
+                'space': 'O(n)'
+            },
             'Bubble Sort': {
                 'best': 'O(n)',
                 'average': 'O(n²)',
@@ -56,6 +62,41 @@ class SortingAlgorithms:
                 'space': 'O(n + k)'
             }
         }
+    
+    @staticmethod
+    def tree_sort(arr: List[int]) -> List[int]:
+        """Tree Sort - O(n log n) average, O(n²) worst"""
+        if not arr:
+            return []
+        
+        class TreeNode:
+            def __init__(self, value):
+                self.value = value
+                self.left = None
+                self.right = None
+        
+        def insert(root, value):
+            if root is None:
+                return TreeNode(value)
+            if value < root.value:
+                root.left = insert(root.left, value)
+            else:
+                root.right = insert(root.right, value)
+            return root
+        
+        def inorder(root, result):
+            if root:
+                inorder(root.left, result)
+                result.append(root.value)
+                inorder(root.right, result)
+        
+        root = None
+        for value in arr:
+            root = insert(root, value)
+        
+        result = []
+        inorder(root, result)
+        return result
     
     @staticmethod
     def bubble_sort(arr: List[int]) -> List[int]:
@@ -233,6 +274,7 @@ class SortingAlgorithms:
     def get_sorting_function(algorithm_name: str) -> Callable:
         """Retorna la función de ordenamiento correspondiente"""
         algorithms = {
+            'Tree Sort': SortingAlgorithms.tree_sort,
             'Bubble Sort': SortingAlgorithms.bubble_sort,
             'Selection Sort': SortingAlgorithms.selection_sort,
             'Insertion Sort': SortingAlgorithms.insertion_sort,
@@ -247,6 +289,7 @@ class SortingAlgorithms:
     def get_available_algorithms() -> List[str]:
         """Retorna lista de algoritmos disponibles"""
         return [
+            'Tree Sort',
             'Bubble Sort',
             'Selection Sort',
             'Insertion Sort',
