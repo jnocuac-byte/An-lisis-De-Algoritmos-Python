@@ -13,7 +13,7 @@ def main():
     
     # Configurar ventana principal
     root.title("🚀 Análisis de Algoritmos - Sistema Completo")
-    root.geometry("900x700")
+    root.geometry("1200x900")
     
     # Centrar ventana
     root.update_idletasks()
