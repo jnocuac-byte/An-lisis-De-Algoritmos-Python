@@ -34,6 +34,7 @@ class ModernDarkTheme:
         'error': '#f85149',           # Rojo
         'purple': '#bc8cff',          # Morado
         'back_button': "#468dde",     # Azul
+        'bar_button': "#ff8787",      # Rojo claro
         
         # Gráficos
         'chart_1': '#58a6ff',
@@ -145,6 +146,22 @@ class ModernDarkTheme:
                   relief=[('pressed', 'flat'),
                           ('!pressed', 'flat')])
         
+        style.configure('Bar.TButton',
+                       background=colors['bar_button'],
+                       foreground="#FFFFFF", 
+                       bordercolor=colors['bar_button'],
+                       borderwidth=0,
+                       relief='flat',
+                       font=('Segoe UI', 11, 'bold'))
+
+        style.map('Bar.TButton',
+                  background=[('active', "#ee6e6e"),
+                              ('!disabled', colors['bar_button'])],
+                  foreground=[('active', "#FFFFFF"),
+                              ('!disabled', "#FFFFFF")],
+                  relief=[('pressed', 'flat'),
+                          ('!pressed', 'flat')])
+
         # Radiobutton
         style.configure('TRadiobutton',
                        background=colors['bg_primary'],

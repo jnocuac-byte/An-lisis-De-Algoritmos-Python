@@ -411,7 +411,8 @@ class SortingAnalyzerGUI:
         self.bar_comparison_button = ttk.Button(
             export_frame,
             text="📊 Comparar Barras",
-            command=self.show_bar_comparison
+            command=self.show_bar_comparison,
+            style='Bar.TButton'
         )
         self.bar_comparison_button.pack(side=tk.LEFT, padx=5)
 

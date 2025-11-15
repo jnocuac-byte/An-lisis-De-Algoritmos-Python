@@ -5,9 +5,14 @@ node_modules/
 
 # Directorios de compilación y salida
 build/
-# dist/
+dist/
+
+# Ignora la carpeta __pycache__ en cualquier nivel
 __pycache__/
 */__pycache__/
+
+# Opcional: Ignora los archivos .pyc directamente (están dentro de __pycache__)
+*.pyc 
 
 # Directorios de registros
 logs/
