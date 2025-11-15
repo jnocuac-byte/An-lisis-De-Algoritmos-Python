@@ -17,7 +17,9 @@ class BarComparisonWindow:
         self.window = tk.Toplevel(parent)
         self.window.title("📊 Comparación General - Gráfico de Barras")
         # Se ajusta la geometría para acomodar el gráfico y las estadísticas lado a lado
-        self.window.geometry("1400x750") 
+        self.width = parent.winfo_screenwidth()
+        self.height = parent.winfo_screenheight()
+        self.window.geometry(f"{self.width - 70}x{self.height - 70}") 
         
         # Aplicar tema
         self.colors = ModernDarkTheme.COLORS

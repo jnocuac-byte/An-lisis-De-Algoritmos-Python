@@ -29,7 +29,9 @@ class TemporalAnalyzerGUI:
         self.root = root
         self.return_callback = return_callback
         self.root.title("🚀 Analizador de Complejidad Temporal")
-        self.root.geometry("1500x900")
+        self.width = root.winfo_screenwidth()
+        self.height = root.winfo_screenheight()
+        self.root.geometry(f"{self.width}x{self.height}")
         
         self.current_results = None
         self.detected_complexity = None

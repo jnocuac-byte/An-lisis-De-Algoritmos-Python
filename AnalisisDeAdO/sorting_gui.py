@@ -1,10 +1,13 @@
 # sorting_gui.py
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
+from turtle import width
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
 from typing import List, Dict
+
+from sympy import root
 
 from sorting_algorithms import SortingAlgorithms
 from dataset_manager import DatasetManager
@@ -20,7 +23,9 @@ class SortingAnalyzerGUI:
         self.root = root
         self.return_callback = return_callback
         self.root.title("Analizador de Algoritmos de Ordenamiento")
-        self.root.geometry("1500x900")
+        self.width = root.winfo_screenwidth()
+        self.height = root.winfo_screenheight()
+        self.root.geometry(f"{self.width}x{self.height}")
         
         self.results = None
         self.current_mode = "generate"  # "generate" o "load"
