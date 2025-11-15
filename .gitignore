@@ -1,0 +1,13 @@
+# Directorios de entornos de desarrollo/dependencias
+venv/
+node_modules/
+.vscode/
+
+# Directorios de compilación y salida
+build/
+# dist/
+__pycache__/
+*/__pycache__/
+
+# Directorios de registros
+logs/

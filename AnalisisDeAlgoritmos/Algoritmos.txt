@@ -1,0 +1,83 @@
+def counting_sort(arr):
+    if not arr:
+        return []
+    max_val = max(arr)
+    count = [0] * (max_val + 1)
+
+    for num in arr:
+        count[num] += 1
+
+    for i in range(1, len(count)):
+        count[i] += count[i-1]
+
+    output = [0] * len(arr)
+
+    for num in reversed(arr):
+        output_index = count[num] - 1
+        output[output_index] = num
+        count[num] -= 1
+
+    return output
+
+arreglo_ejemplo = arr
+arreglo_ordenado = counting_sort(arreglo_ejemplo)
+
+print(arreglo_ordenado)
+
+----------------------------------------------------------------------------------------------------
+
+def merge_sort(arr):
+    if len(arr) > 1:
+        mid = len(arr) // 2
+        left_half = arr[:mid]
+        right_half = arr[mid:]
+
+        merge_sort(left_half)
+        merge_sort(right_half)
+
+        i = j = k = 0
+
+        while i < len(left_half) and j < len(right_half):
+            if left_half[i] < right_half[j]:
+                arr[k] = left_half[i]
+                i += 1
+            else:
+                arr[k] = right_half[j]
+                j += 1
+            k += 1
+
+        while i < len(left_half):
+            arr[k] = left_half[i]
+            i += 1
+            k += 1
+
+        while j < len(right_half):
+            arr[k] = right_half[j]
+            j += 1
+            k += 1
+            
+    return arr
+
+arreglo_ejemplo = arr
+arreglo_ordenado = merge_sort(arreglo_ejemplo)
+
+print(arreglo_ordenado)
+
+----------------------------------------------------------------------------------------------------
+
+def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        swapped = False
+        for j in range(0, n - i - 1):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True
+        if not swapped:
+            break
+    return arr
+
+arreglo_ejemplo = arr
+arreglo_ordenado = bubble_sort(arreglo_ejemplo)
+
+print(arreglo_ordenado)
