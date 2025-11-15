@@ -81,9 +81,18 @@ class BarComparisonWindow:
         
         # Bind mousewheel para scroll
         def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            scroll_units = int(-1 * (event.delta / 120)) 
+            canvas.yview_scroll(scroll_units, "units")
         
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        canvas.bind("<MouseWheel>", _on_mousewheel)
+        self.window.bind("<MouseWheel>", _on_mousewheel)
+
+        canvas.bind('<Button-4>', lambda e: canvas.yview_scroll(-1, "units"))
+        canvas.bind('<Button-5>', lambda e: canvas.yview_scroll(1, "units"))
+        self.window.bind('<Button-4>', lambda e: canvas.yview_scroll(-1, "units"))
+        self.window.bind('<Button-5>', lambda e: canvas.yview_scroll(1, "units"))
+
+        canvas.bind('<Enter>', lambda e: canvas.focus_set())
         
         # Frame para botón cerrar (fuera del scroll)
         button_frame = ttk.Frame(self.window)
