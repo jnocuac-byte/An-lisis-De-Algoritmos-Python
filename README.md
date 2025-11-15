@@ -15,11 +15,6 @@ Este es un sistema educativo diseñado para analizar diferentes algoritmos y su 
 - Python 3.x
 - Bibliotecas necesarias: `numpy`, `matplotlib`, etc.
 
-### Comandos
-```bash
-pip install -r requirements.txt
-```
-
 ## Guía de Uso
 ### Analizador de Complejidad Temporal
 Instrucciones sobre cómo usar la herramienta de análisis de complejidad temporal.

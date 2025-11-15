@@ -5,7 +5,7 @@ node_modules/
 
 # Directorios de compilación y salida
 build/
-dist/
+# dist/
 __pycache__/
 */__pycache__/
 
