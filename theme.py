@@ -23,8 +23,8 @@ class ModernDarkTheme:
         'border_hover': '#58a6ff',
         
         # Textos
-        'text_primary': '#c9d1d9',    # Texto principal
-        'text_secondary': '#8b949e',  # Texto secundario
+        'text_primary': "#ffffff",    # Texto principal
+        'text_secondary': "#ffffff",  # Texto secundario
         'text_link': '#58a6ff',       # Enlaces
         
         # Acentos y estados
@@ -33,6 +33,7 @@ class ModernDarkTheme:
         'warning': '#d29922',         # Amarillo
         'error': '#f85149',           # Rojo
         'purple': '#bc8cff',          # Morado
+        'back_button': "#468dde",     # Azul
         
         # Gráficos
         'chart_1': '#58a6ff',
@@ -70,22 +71,22 @@ class ModernDarkTheme:
         style.configure('TLabel',
                        background=colors['bg_primary'],
                        foreground=colors['text_primary'],
-                       font=('Segoe UI', 10))
+                       font=('Segoe UI', 11))
         
         style.configure('Title.TLabel',
                        background=colors['bg_primary'],
                        foreground=colors['text_primary'],
-                       font=('Segoe UI', 14, 'bold'))
+                       font=('Segoe UI', 15, 'bold'))
         
         style.configure('Heading.TLabel',
                        background=colors['bg_primary'],
                        foreground=colors['text_primary'],
-                       font=('Segoe UI', 11, 'bold'))
+                       font=('Segoe UI', 12, 'bold'))
         
         style.configure('Secondary.TLabel',
                        background=colors['bg_primary'],
                        foreground=colors['text_secondary'],
-                       font=('Segoe UI', 9))
+                       font=('Segoe UI', 10))
         
         # LabelFrame
         style.configure('TLabelframe',
@@ -98,7 +99,7 @@ class ModernDarkTheme:
         style.configure('TLabelframe.Label',
                        background=colors['bg_secondary'],
                        foreground=colors['accent'],
-                       font=('Segoe UI', 10, 'bold'))
+                       font=('Segoe UI', 11, 'bold'))
         
         # Button
         style.configure('TButton',
@@ -106,7 +107,7 @@ class ModernDarkTheme:
                        foreground=colors['text_primary'],
                        bordercolor=colors['border'],
                        focuscolor='none',
-                       font=('Segoe UI', 10),
+                       font=('Segoe UI', 11),
                        padding=(15, 8))
         
         style.map('TButton',
@@ -120,7 +121,7 @@ class ModernDarkTheme:
                        background=colors['accent'],
                        foreground='#ffffff',
                        bordercolor=colors['accent'],
-                       font=('Segoe UI', 10, 'bold'),
+                       font=('Segoe UI', 11, 'bold'),
                        padding=(15, 10))
         
         style.map('Accent.TButton',
@@ -128,11 +129,27 @@ class ModernDarkTheme:
                            ('pressed', '#388bfd')],
                  foreground=[('active', '#ffffff')])
         
+        style.configure('Back.TButton',
+                       background=colors['back_button'],
+                       foreground="#FFFFFF", 
+                       bordercolor=colors['back_button'],
+                       borderwidth=0,
+                       relief='flat',
+                       font=('Segoe UI', 11, 'bold'))
+        
+        style.map('Back.TButton',
+                  background=[('active', '#3c79c8'),
+                              ('!disabled', colors['back_button'])],
+                  foreground=[('active', "#FFFFFF"),
+                              ('!disabled', "#FFFFFF")],
+                  relief=[('pressed', 'flat'),
+                          ('!pressed', 'flat')])
+        
         # Radiobutton
         style.configure('TRadiobutton',
                        background=colors['bg_primary'],
                        foreground=colors['text_primary'],
-                       font=('Segoe UI', 10),
+                       font=('Segoe UI', 11),
                        focuscolor='none')
         
         style.map('TRadiobutton',
@@ -143,7 +160,7 @@ class ModernDarkTheme:
         style.configure('TCheckbutton',
                        background=colors['bg_primary'],
                        foreground=colors['text_primary'],
-                       font=('Segoe UI', 10),
+                       font=('Segoe UI', 11),
                        focuscolor='none')
         
         style.map('TCheckbutton',
@@ -156,7 +173,7 @@ class ModernDarkTheme:
                        foreground=colors['text_primary'],
                        bordercolor=colors['border'],
                        insertcolor=colors['text_primary'],
-                       font=('Segoe UI', 10))
+                       font=('Segoe UI', 11))
         
         style.map('TEntry',
                  fieldbackground=[('readonly', colors['bg_tertiary'])],
@@ -169,7 +186,7 @@ class ModernDarkTheme:
                        foreground=colors['text_primary'],
                        bordercolor=colors['border'],
                        arrowcolor=colors['text_primary'],
-                       font=('Segoe UI', 10))
+                       font=('Segoe UI', 11))
         
         style.map('TCombobox',
                  fieldbackground=[('readonly', colors['bg_tertiary'])],
@@ -181,13 +198,13 @@ class ModernDarkTheme:
                        foreground=colors['text_primary'],
                        fieldbackground=colors['bg_tertiary'],
                        bordercolor=colors['border'],
-                       font=('Segoe UI', 9))
+                       font=('Segoe UI', 10))
         
         style.configure('Treeview.Heading',
                        background=colors['bg_active'],
                        foreground=colors['text_primary'],
                        bordercolor=colors['border'],
-                       font=('Segoe UI', 10, 'bold'))
+                       font=('Segoe UI', 11, 'bold'))
         
         style.map('Treeview',
                  background=[('selected', colors['accent'])],

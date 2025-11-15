@@ -258,7 +258,7 @@ print(ordenado)"""
         self.callback = callback
         self.window = tk.Toplevel(parent)
         self.window.title("📝 Ejemplos de Código Python")
-        self.window.geometry("900x650")
+        self.window.geometry("920x670")
         
         # Aplicar tema
         self.colors = ModernDarkTheme.COLORS

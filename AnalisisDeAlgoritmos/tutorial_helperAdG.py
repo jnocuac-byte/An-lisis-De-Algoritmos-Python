@@ -52,6 +52,35 @@ class TutorialWindow:
         
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Función para manejar el scroll de la rueda del mouse
+        def on_mouse_wheel(event):
+            # Forzamos el scroll en el canvas.
+            if event.delta: # Windows/macOS
+                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            elif event.num == 4: # Linux (Scroll Up)
+                canvas.yview_scroll(-1, "units")
+            elif event.num == 5: # Linux (Scroll Down)
+                canvas.yview_scroll(1, "units")
+            return "break" # Detiene la propagación del evento
+
+        # Función que vincula el evento a todos los widgets hijos
+        def bind_all_children(widget):
+            # Vincula la función de scroll a todos los widgets contenidos en el frame
+            widget.bind("<MouseWheel>", on_mouse_wheel)
+            widget.bind("<Button-4>", on_mouse_wheel)
+            widget.bind("<Button-5>", on_mouse_wheel)
+            for child in widget.winfo_children():
+                bind_all_children(child)
+        
+        # Vinculamos la función al scrollable_frame y a todos sus hijos
+        bind_all_children(scrollable_frame)
+        
+        # También vinculamos al canvas y la ventana principal por si acaso
+        canvas.bind("<MouseWheel>", on_mouse_wheel)
+        self.window.bind("<MouseWheel>", on_mouse_wheel)
+        self.window.bind("<Button-4>", on_mouse_wheel)
+        self.window.bind("<Button-5>", on_mouse_wheel)
         
         # Título
         title = ttk.Label(

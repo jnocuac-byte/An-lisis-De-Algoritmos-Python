@@ -116,7 +116,8 @@ class TemporalAnalyzerGUI:
         back_btn = ttk.Button(
             parent,
             text="◀️ Volver al Menú Principal",
-            command=self.return_to_menu
+            command=self.return_to_menu,
+            style='Back.TButton'
         )
         back_btn.pack(fill=tk.X, padx=5, pady=(5, 5))
         

@@ -111,7 +111,8 @@ class SortingAnalyzerGUI:
         back_btn = ttk.Button(
             control_frame,
             text="◀️ Volver al Menú Principal",
-            command=self.return_to_menu
+            command=self.return_to_menu,
+            style='Back.TButton'
         )
         back_btn.pack(fill=tk.X, pady=(0, 10))
 
@@ -321,7 +322,7 @@ class SortingAnalyzerGUI:
             select_frame,
             text="✗ Ninguno",
             command=self.deselect_all_algorithms
-        ).grid(row=0, column=1, sticky=tk.EW, padx=(5, 0))
+        ).grid(row=1, column=0, columnspan=2, sticky=tk.EW, padx=0, pady=(5, 0))
         
         # Separator
         separator3 = ttk.Frame(control_frame, height=1)
@@ -363,7 +364,7 @@ class SortingAnalyzerGUI:
         from theme import ModernDarkTheme
         colors = ModernDarkTheme.COLORS
         
-        results_frame = ttk.LabelFrame(parent, text="📊  Resultados del Análisis", padding=10)
+        results_frame = ttk.LabelFrame(parent, text="📊  [TABLA] Resultados del Análisis", padding=10)
         results_frame.pack(fill=tk.BOTH, expand=False, padx=5, pady=5)
         
         # Crear tabla con scrollbar

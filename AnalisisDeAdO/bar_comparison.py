@@ -16,7 +16,8 @@ class BarComparisonWindow:
         
         self.window = tk.Toplevel(parent)
         self.window.title("📊 Comparación General - Gráfico de Barras")
-        self.window.geometry("1100x750")  # Aumentado de 1000x650 a 1100x750
+        # Se ajusta la geometría para acomodar el gráfico y las estadísticas lado a lado
+        self.window.geometry("1400x750") 
         
         # Aplicar tema
         self.colors = ModernDarkTheme.COLORS
@@ -36,25 +37,12 @@ class BarComparisonWindow:
     
     def create_widgets(self):
         """Crea los widgets de la ventana"""
-        # Frame principal con scrollbar
+        # Frame principal
         main_container = ttk.Frame(self.window)
         main_container.pack(fill=tk.BOTH, expand=True)
         
-        # Canvas y scrollbar para contenido scrolleable
-        canvas = tk.Canvas(main_container, bg=self.colors['bg_primary'], highlightthickness=0)
-        scrollbar = ttk.Scrollbar(main_container, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
-        
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-        
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-        
         # Frame superior
-        header = ttk.Frame(scrollable_frame, padding=15)
+        header = ttk.Frame(main_container, padding=15)
         header.pack(fill=tk.X)
         
         ttk.Label(
@@ -63,38 +51,24 @@ class BarComparisonWindow:
             style='Title.TLabel'
         ).pack()
         
-        # Frame para gráfico
-        chart_frame = ttk.Frame(scrollable_frame, padding=10)
-        chart_frame.pack(fill=tk.BOTH, expand=True)
+        # --- Nuevo Contenedor para Gráfico y Estadísticas Lado a Lado ---
+        content_container = ttk.Frame(main_container, padding=(10, 0)) # Padding horizontal
+        content_container.pack(fill=tk.BOTH, expand=True)
+
+        # 1. Frame para gráfico (Izquierda)
+        chart_frame = ttk.Frame(content_container, padding=10)
+        chart_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5)) # Un poco de espacio a la derecha
         
         self.create_bar_chart(chart_frame)
         
-        # Frame de estadísticas con padding adicional
-        stats_frame = ttk.LabelFrame(scrollable_frame, text="📈  Estadísticas", padding=20)
-        stats_frame.pack(fill=tk.X, padx=10, pady=10)
+        # 2. Frame de estadísticas (Derecha)
+        stats_frame = ttk.LabelFrame(content_container, text="📈  Estadísticas", padding=20)
+        stats_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=(5, 10)) # Se llena en Y, no se expande
         
         self.create_statistics(stats_frame)
-        
-        # Pack canvas y scrollbar
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-        
-        # Bind mousewheel para scroll
-        def _on_mousewheel(event):
-            scroll_units = int(-1 * (event.delta / 120)) 
-            canvas.yview_scroll(scroll_units, "units")
-        
-        canvas.bind("<MouseWheel>", _on_mousewheel)
-        self.window.bind("<MouseWheel>", _on_mousewheel)
+        # --- Fin del Nuevo Contenedor ---
 
-        canvas.bind('<Button-4>', lambda e: canvas.yview_scroll(-1, "units"))
-        canvas.bind('<Button-5>', lambda e: canvas.yview_scroll(1, "units"))
-        self.window.bind('<Button-4>', lambda e: canvas.yview_scroll(-1, "units"))
-        self.window.bind('<Button-5>', lambda e: canvas.yview_scroll(1, "units"))
-
-        canvas.bind('<Enter>', lambda e: canvas.focus_set())
-        
-        # Frame para botón cerrar (fuera del scroll)
+        # Frame para botón cerrar (al final)
         button_frame = ttk.Frame(self.window)
         button_frame.pack(fill=tk.X, pady=10)
         
@@ -103,12 +77,17 @@ class BarComparisonWindow:
             text="✕ Cerrar",
             command=self.window.destroy
         ).pack()
-    
+        
+        # Nota: El scrollbar se ha eliminado ya que la idea es que quepa todo
+        # en la nueva geometría más ancha. Si el contenido de las estadísticas
+        # o el gráfico crece mucho, se podría reintroducir.
+
     def create_bar_chart(self, parent):
         """Crea el gráfico de barras"""
         from theme import ModernDarkTheme
         
-        fig, ax = plt.subplots(figsize=(10, 5.5))  # Aumentado altura de 5 a 5.5
+        # Ajuste el figsize (ancho reducido, altura mantenida) para dejar espacio a las estadísticas
+        fig, ax = plt.subplots(figsize=(8.5, 5.5)) 
         
         # Preparar datos
         algorithms = []
@@ -202,31 +181,31 @@ class BarComparisonWindow:
         
         for i, (label, value, color) in enumerate(stats_data):
             frame = ttk.Frame(stats_grid)
-            frame.grid(row=i, column=0, sticky=tk.W, pady=8)  # Aumentado pady de 5 a 8
+            frame.grid(row=i, column=0, sticky=tk.W, pady=8)
             
-            ttk.Label(frame, text=label, font=('Segoe UI', 11, 'bold')).pack(side=tk.LEFT)  # Aumentado de 10 a 11
+            ttk.Label(frame, text=label, font=('Segoe UI', 11, 'bold')).pack(side=tk.LEFT)
             
             value_label = tk.Label(frame, text=value, 
-                                  font=('Segoe UI', 11),  # Aumentado de 10 a 11
+                                  font=('Segoe UI', 11),
                                   fg=color, bg=self.colors['bg_secondary'])
-            value_label.pack(side=tk.LEFT, padx=15)  # Aumentado de 10 a 15
+            value_label.pack(side=tk.LEFT, padx=15)
         
         # Diferencia
         diff = algo_times[slowest] - algo_times[fastest]
         if algo_times[fastest] > 0:
             factor = algo_times[slowest] / algo_times[fastest]
             diff_frame = ttk.Frame(stats_grid)
-            diff_frame.grid(row=3, column=0, sticky=tk.W, pady=8)  # Aumentado pady de 5 a 8
+            diff_frame.grid(row=3, column=0, sticky=tk.W, pady=8)
             
             ttk.Label(diff_frame, text="📊 Diferencia:", 
-                     font=('Segoe UI', 11, 'bold')).pack(side=tk.LEFT)  # Aumentado de 10 a 11
+                     font=('Segoe UI', 11, 'bold')).pack(side=tk.LEFT)
             
             diff_label = tk.Label(diff_frame, 
                                  text=f"{self.format_time(diff)} ({factor:.1f}x más lento)",
-                                 font=('Segoe UI', 11),  # Aumentado de 10 a 11
+                                 font=('Segoe UI', 11),
                                  fg=self.colors['warning'], 
                                  bg=self.colors['bg_secondary'])
-            diff_label.pack(side=tk.LEFT, padx=15)  # Aumentado de 10 a 15
+            diff_label.pack(side=tk.LEFT, padx=15)
     
     @staticmethod
     def format_time(seconds: float) -> str:
